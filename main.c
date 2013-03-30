@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "collect.h"
+#include "pcap_collect.h"
 
 //----------------------------------------------------------------------------
 

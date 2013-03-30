@@ -3,6 +3,7 @@
 
 #include "err_msg.h"      // errprintf()
 #include "internal_ipc.h" // send_stream_data()
+#include "pcap_collect.h"
 
 #define FOREVER (-1)
 
