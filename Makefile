@@ -5,7 +5,7 @@
 all: flowmon
 
 flowmon: $(wildcard *.c *.h)
-	gcc -Wall -lpcap $(filter %.c,$^) -o flowmon
+	gcc -std=gnu99 -Wall -lpcap $(filter %.c,$^) -o flowmon
 
 run: flowmon
 	sudo ./flowmon
