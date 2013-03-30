@@ -3,7 +3,7 @@
 
 //----------------------------------------------------------------------------
 
-void start_bpf_process(int id, int write_fd, char *iface, char *filter);
+void start_pcap_process(int id, int write_fd, char *iface, char *filter);
 
 //----------------------------------------------------------------------------
 

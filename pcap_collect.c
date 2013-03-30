@@ -63,7 +63,7 @@ void* periodic_send_stream_data(struct stream_data *stream)
 
 //----------------------------------------------------------------------------
 
-void start_bpf_process(int id, int write_fd, char *iface, char *filter)
+void start_pcap_process(int id, int write_fd, char *iface, char *filter)
 {
   struct bpf_program compiled_filter;
   struct stream_data data;

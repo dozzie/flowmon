@@ -59,7 +59,7 @@ int main(int argc, char **argv)
       // overwrite something on stack, like environment or arguments
       //sprintf(argv[0], "flowmon [%s]", stream_names[i]);
       close(read_fd);
-      start_bpf_process(i, write_fd, ifaces[i], filters[i]);
+      start_pcap_process(i, write_fd, ifaces[i], filters[i]);
       exit(1);
     }
   }
