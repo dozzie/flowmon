@@ -48,9 +48,19 @@ void count_packets(struct stream_data *stream,
                    const struct pcap_pkthdr *hdr,
                    const u_char *bytes)
 {
-  send_stream_data(stream->write_fd,
-                   stream->id, hdr->ts.tv_sec,
-                   hdr->len, 1);
+  if (stream->time != hdr->ts.tv_sec) {
+    // send data collected up until now
+    send_stream_data(stream->write_fd, stream->id,
+                     stream->time, stream->bytes, stream->packets);
+
+    // reset stats
+    stream->time = hdr->ts.tv_sec;
+    stream->bytes   = 0;
+    stream->packets = 0;
+  }
+
+  stream->bytes   += hdr->len;
+  stream->packets += 1;
 }
 
 //----------------------------------------------------------------------------
