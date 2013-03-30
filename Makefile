@@ -2,8 +2,10 @@
 
 .PHONY: all run
 
-all flowmon:
-	gcc -Wall -lpcap collect.c -o flowmon
+all: flowmon
+
+flowmon: $(wildcard *.c *.h)
+	gcc -Wall -lpcap $(filter %.c,$^) -o flowmon
 
 run: flowmon
 	sudo ./flowmon

@@ -1,10 +1,8 @@
-#define _GNU_SOURCE 1
-#include <stdio.h>    // fdprintf()
-#include <stdarg.h>   // va_*
-#include <unistd.h>   // write()
-
 #include <pcap.h>
 #include <string.h>   // memset()
+
+#include "err_msg.h"      // errprintf()
+#include "internal_ipc.h" // send_stream_data()
 
 #define FOREVER (-1)
 
@@ -18,29 +16,6 @@ struct stream_data {
   int packets;
 };
 
-//----------------------------------------------------------------------------
-// auxiliary functions {{{
-
-static
-void send_stream_data(int fd, int id, int time, int bytes, int packets)
-{
-  dprintf(fd, "{\"stream_id\":%d,\"time\":%d,\"bytes\":%d,\"packets\":%d}\n",
-              id, time, bytes, packets);
-}
-
-int errprintf(const char *fmt, ...)
-{
-  va_list args;
-  va_start(args, fmt);
-  char buf[1024];
-  int len = vsnprintf(buf, 1024, fmt, args);
-  if (len >= 0)
-    write(2 /* stderr */, buf, len);
-  va_end(args);
-  return len;
-}
-
-// }}}
 //----------------------------------------------------------------------------
 
 static
@@ -106,15 +81,6 @@ void start_bpf_process(int id, int write_fd, char *iface, char *filter)
   data.write_fd = write_fd;
 
   pcap_loop(socket, FOREVER, (pcap_handler)count_packets, (u_char *)&data);
-}
-
-//----------------------------------------------------------------------------
-
-int main(void)
-{
-  start_bpf_process(1638, 1 /* stdout */, "wlan0",
-                    "host jarowit.net and not port 22");
-  return 0;
 }
 
 //----------------------------------------------------------------------------
