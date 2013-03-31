@@ -1,0 +1,28 @@
+flowmon is a tool for displaying in real time amount of data going through
+specified streams. A stream is defined as BPF filter, the same as for tcpdump.
+
+flowmon should be handy for people working with traffic shaping, but with an
+appropriate wrapper, it may be used as a source of metrics fed to monitoring
+systems (collectd, Cacti, Nagios, Zenoss and so on).
+
+flowmon comes as two tools: flowmon binary, which prints JSON records to
+STDOUT and fmcurses.py, which reads JSON from STDIN and displays it on screen
+(using curses).
+
+Compilation: it should be enough to use `make'. You may need libpcapX-dev
+(Debian) or libpcap-devel (Red Hat/CentOS) and GCC.
+
+Installation: copy flowmon and fmcurses.py anywhere you feel appropriate.
+
+How to run:
+
+# cat savedargs
+any 'tcp port 22'     'SSH'
+any 'esp'             'IPsec'
+any 'port 53'         'DNS'
+# flowmon savedargs | fmcurses.py
+# flowmon -i any -f 'tcp port 80' -d 'HTTP traffic' | fmcurses.py
+
+In command line, if there is no description for a filter, the filter itself is
+considered a description. If there is no interface name for a filter,
+interface defaults to "any".
