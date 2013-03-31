@@ -8,8 +8,7 @@ flowmon:
 
 fmcurses.py:
   * add comment on what the heck is this
-  * mean over a fixed window (5s, 30s, 180s)
-    * support for different window lengths
+  * support for different window lengths for mean
   * support for 'q' key for quit
   * support for different ID, name and value attributes
 

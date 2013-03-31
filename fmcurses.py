@@ -33,6 +33,78 @@ def try_read_json(filehandle):
 
 # }}}
 #-----------------------------------------------------------------------------
+# mean over a window {{{
+
+class WindowedMean:
+  def __init__(self, step = 1, window = 5):
+    self.window = window
+    self.step = step
+
+    queue_length = (window + step - 1) / step
+    self.queue = [None] * queue_length
+    self.queue_position = 0 # next value will be put here
+
+    self.latest = None
+
+  def update(self, value, time = None):
+    if time == None:
+      from time import time as timestamp
+      time = int(timestamp())
+
+    if self.latest != None:
+      if time <= self.latest:
+        # TODO: raise an error
+        return
+
+      skipped_entries = (time - self.latest + self.step - 1) / self.step - 1
+
+      if skipped_entries >= len(self.queue):
+        # kill all the entries and reset position
+        for x in range(len(self.queue)):
+          self.queue[x] = None
+        self.queue_position = 0
+      else:
+        # kill entries that were skipped and update pointer
+        for x in range(skipped_entries):
+          self.queue[(x + self.queue_position) % len(self.queue)] = None
+        self.queue_position += skipped_entries
+        self.queue_position %= len(self.queue)
+
+    self.queue[self.queue_position] = value
+    self.queue_position += 1
+    self.queue_position %= len(self.queue)
+    self.latest = time
+
+  def __getitem__(self, index):
+    if index < 0:
+      # queue position less requested index
+      #   * index is negative
+      #   * index starts at 1, but queue position is 1 after last entry
+      i = self.queue_position + index + len(self.queue)
+      return self.queue[i % len(self.queue)]
+
+    if index > self.latest:
+      # TODO: raise an error
+      return None
+
+    # FIXME: this may be inaccurate
+    idx = (self.latest - index) / self.step
+    return self.queue[idx]
+
+  def mean(self, window = None):
+    if window == None:
+      window = len(self.queue)
+
+    acc = 0.0
+    nitems = 0
+    for x in range(-window, 0):
+      if self[x] != None:
+        acc += self[x]
+        nitems += 1
+    return acc / nitems
+
+# }}}
+#-----------------------------------------------------------------------------
 # curses support {{{
 
 import curses
@@ -63,15 +135,24 @@ class Curses:
 set_nonblocking(sys.stdin)
 
 screen = Curses()
+mean = {}
+periods = [5, 30, 180]
+max_period = max(periods)
 
 def print_stream(stream):
   i = stream['stream_id']
   name = stream['stream_name']
-  flow = stream['bytes'] / 1024.0
+  if i not in mean:
+    mean[i] = WindowedMean(window = max_period)
+
+  mean[i].update(stream['bytes'], stream['time'])
+
   # print stream name
   screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, name), curses.A_BOLD)
   # print stream flow
-  screen.prn(i * 2 + 2, 0, "%9.2f kB/s [%3ds]" % (flow, 1))
+  for p in range(len(periods)):
+    flow = mean[i].mean(periods[p])
+    screen.prn(i * 2 + 2, 22 * p, "%9.2f kB/s [%3ds]" % (flow, periods[p]))
 
 try:
   while True:
