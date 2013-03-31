@@ -1,5 +1,4 @@
 flowmon:
-  * loading filters and names from command line and file
   * graceful quit on various signals
   * graceful quit on closing STDOUT
 

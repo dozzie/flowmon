@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include "pcap_collect.h"
 #include "internal_ipc.h"
+#include "command_line_args.h"
+#include "config.h"
 
 #include <unistd.h> // fork()
 #include <stdlib.h> // exit()
 #include <time.h>   // time()
+#include <string.h> // strrchr()
 
 //----------------------------------------------------------------------------
 
@@ -35,26 +38,39 @@ void loop_read_dump_json(int read_fd, char **stream_names)
 
 int main(int argc, char **argv)
 {
-  // TODO: read stuff from command line
-#define NSTREAMS 2
-  char *stream_names[] = {
-    "all jarowit.net traffic",
-    "jarowit.net HTTP traffic"
-  };
-  char *ifaces[] = {
-    "wlan0",
-    "wlan0"
-  };
-  char *filters[] = {
-    "host jarowit.net and not port 22",
-    "host jarowit.net and (port 80 or port 443)"
-  };
+  char *filters[MAXFILTERS];
+  char *stream_names[MAXFILTERS]; // was: descrs
+  char *ifaces[MAXFILTERS];
+
+  size_t streams_number = count_flow_number(argc, argv,
+                                            filters, stream_names, ifaces);
+
+  //--------------------------------------------------------------------------
+  // help message
+
+  if (streams_number == 0) {
+    char *prog = strrchr(argv[0], '/');
+    prog = (prog == NULL) ? argv[0] : prog + 1;
+
+    printf("Usage: %s -f bpf_filter [-i iface] [-d description] "
+           "... filter_file\n", prog);
+    puts("\n"
+         "filter file format:\n"
+         "iface-name 'bpf filter within quotes' 'description, also within "
+         "quotes'\n"
+         "iface2 'another filter' 'another description'\n"
+         "[...]");
+
+    return 0;
+  }
+
+  //--------------------------------------------------------------------------
+  // actual work
 
   int read_fd, write_fd;
-
   make_pipe(&read_fd, &write_fd); // TODO: error handling
 
-  for (int i = 0; i < NSTREAMS; ++i) {
+  for (int i = 0; i < streams_number; ++i) {
     // TODO: remember children and set some signal handler (SIGHUP, SIGINT,
     // SIGTERM)
     if (fork() == 0) {
