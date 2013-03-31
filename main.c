@@ -16,6 +16,9 @@ void loop_read_dump_json(int read_fd, char **stream_names)
   int bytes;
   int packets;
 
+  // disable buffering
+  setbuf(stdout, NULL);
+
   while (1) {
     read_stream_data(read_fd, &id, &collection_time,
                      &bytes, &packets);
