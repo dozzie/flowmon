@@ -1,0 +1,16 @@
+flowmon:
+  * loading filters and names from command line and file
+  * graceful quit on various signals
+  * graceful quit on closing STDOUT
+
+fmcurses.py:
+  * mean over a fixed window (5s, 30s, 180s)
+    * support for different window lengths
+  * support for 'q' key for quit
+  * support for different ID, name and value attributes
+
+fmrrd.py:
+  * write whole thing, actually
+
+fmcollectd.py
+  * write whole thing, actually
