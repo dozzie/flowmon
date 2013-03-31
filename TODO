@@ -1,14 +1,20 @@
+bundle:
+  * debianize sources
+  * create RPM spec file
+
 flowmon:
   * graceful quit on various signals
   * graceful quit on closing STDOUT
 
 fmcurses.py:
+  * add comment on what the heck is this
   * mean over a fixed window (5s, 30s, 180s)
     * support for different window lengths
   * support for 'q' key for quit
   * support for different ID, name and value attributes
 
 fmrrd.py:
+  * add comment on what the heck is this
   * support more than one stream
   * support different data record layout (now: "time","bytes","packets")
   * probably the best would be to make it a module
