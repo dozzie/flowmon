@@ -9,7 +9,10 @@ fmcurses.py:
   * support for different ID, name and value attributes
 
 fmrrd.py:
-  * write whole thing, actually
+  * support more than one stream
+  * support different data record layout (now: "time","bytes","packets")
+  * probably the best would be to make it a module
+    * module can spawn flowmon on its own
 
 fmcollectd.py
   * write whole thing, actually

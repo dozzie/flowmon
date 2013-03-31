@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 import sys
-#import optparse
-#import Queue
 import time
+import rrdtool
 
 #-----------------------------------------------------------------------------
 # non-blocking I/O {{{
@@ -33,55 +32,31 @@ def try_read_json(filehandle):
 
 # }}}
 #-----------------------------------------------------------------------------
-# curses support {{{
 
-import curses
+if len(sys.argv) < 2:
+  print "Usage: %s database.rrd" % (sys.argv[0].split('/')[-1])
+  print ""
+  print "RRD database should have two data sources, one for B/s and" + \
+        " one for packets/s."
+  sys.exit(0)
 
-class Curses:
-  def __init__(self):
-    self.screen = curses.initscr()
-    self.curses = curses
-    curses.cbreak()
-    curses.noecho()
-    curses.nonl()
-    #self.screen.nodelay(1)
-    self.screen.timeout(100)
-
-  def __del__(self):
-    import curses
-    curses.endwin()
-
-  def prn(self, y, x, string, attrs = 0):
-    self.screen.addstr(y, x, string, attrs)
-
-  def refresh(self):
-    self.screen.refresh()
-
-# }}}
-#-----------------------------------------------------------------------------
+rrd_file = sys.argv[1]
 
 set_nonblocking(sys.stdin)
-
-screen = Curses()
-
-def print_stream(stream):
-  i = stream['stream_id']
-  name = stream['stream_name']
-  flow = stream['bytes'] / 1024.0
-  # print stream name
-  screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, name), curses.A_BOLD)
-  # print stream flow
-  screen.prn(i * 2 + 2, 0, "%9.2f kB/s [%3ds]" % (flow, 1))
 
 try:
   while True:
     stream = try_read_json(sys.stdin)
     while stream != None:
-      print_stream(stream)
+      if stream['stream_id'] == 0:
+        data = '%(time)d:%(bytes)d:%(packets)d' % (stream)
+        print "updating stream %d: %s" % (stream['stream_id'], data)
+        rrdtool.update(rrd_file, data)
+      else:
+        print "ignored stream %d" % (stream['stream_id'])
       stream = try_read_json(sys.stdin)
 
-    # no stream data left -- refresh and wait for more
-    screen.refresh()
+    # no stream data left -- wait for more
     time.sleep(0.01)
 except KeyboardInterrupt:
   pass
