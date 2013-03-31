@@ -31,15 +31,6 @@ def try_read_json(filehandle):
 
   return result
 
-def read_json_list(filehandle):
-  result = []
-  while True:
-    data = try_read_json(filehandle)
-    if data == None:
-      break
-    result.append(data)
-  return result if len(result) > 0 else None
-
 # }}}
 #-----------------------------------------------------------------------------
 # {{{
@@ -70,37 +61,30 @@ class Curses:
 #-----------------------------------------------------------------------------
 
 set_nonblocking(sys.stdin)
-streams = read_json_list(sys.stdin)
-while streams == None:
-  time.sleep(0.1)
-  streams = read_json_list(sys.stdin)
-
-stream_names = {}
-for x in streams:
-  stream_names[ x['stream_id'] ] = x['stream_name']
 
 screen = Curses()
-for i in stream_names.keys():
-  screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, stream_names[i]), curses.A_BOLD)
 
 def print_stream(stream):
   i = stream['stream_id']
+  name = stream['stream_name']
   flow = stream['bytes'] / 1024.0
+  # print stream name
+  screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, name), curses.A_BOLD)
+  # print stream flow
   screen.prn(i * 2 + 2, 0, "%9.2f kB/s [%3ds]" % (flow, 1))
 
-for stream in streams:
-  print_stream(stream)
-
-screen.refresh()
-
-while True:
-  stream = try_read_json(sys.stdin)
-  while stream != None:
-    sys.stderr.write("stream: %s\n" % (stream))
-    print_stream(stream)
+try:
+  while True:
     stream = try_read_json(sys.stdin)
-  screen.refresh()
-  time.sleep(0.01)
+    while stream != None:
+      print_stream(stream)
+      stream = try_read_json(sys.stdin)
+
+    # no stream data left -- refresh and wait for more
+    screen.refresh()
+    time.sleep(0.01)
+except KeyboardInterrupt:
+  pass
 
 #-----------------------------------------------------------------------------
-# vim:ft=python
+# vim:ft=python:foldmethod=marker
