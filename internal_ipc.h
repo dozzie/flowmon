@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Communication between processes spawned internally (unit API).
+ */
+
 #ifndef __INTERNAL_IPC_H
 #define __INTERNAL_IPC_H
 

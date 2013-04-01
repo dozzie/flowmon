@@ -1,3 +1,12 @@
+/**
+ * @file
+ * Function \c main() and displayer (workers' parent) process loop.
+ *
+ * This compilation unit contains code for spawning workers (they capture
+ * network traffic) and for receiving from them data about their streams.
+ * Then, the data is sent as JSON to \c stdout.
+ */
+
 #include <stdio.h>
 #include "pcap_collect.h"
 #include "internal_ipc.h"
@@ -11,6 +20,14 @@
 
 //----------------------------------------------------------------------------
 
+/**
+ * Receive data from children and pass it to \c stdout as JSON.
+ *
+ * @param  read_fd  socket for receiving messages from children (\ref
+ *   make_pipe())
+ * @param  stream_names  array of names of streams captured by children,
+ *   indexed by child IDs
+ */
 static
 void loop_read_dump_json(int read_fd, char **stream_names)
 {
@@ -36,6 +53,17 @@ void loop_read_dump_json(int read_fd, char **stream_names)
 
 //----------------------------------------------------------------------------
 
+/**
+ * Application entry point.
+ *
+ * This function calls command line parsing, creates children (workers that
+ * capture streams) and calls displayer loop (\ref loop_read_dump_json()).
+ *
+ * @param  argc  number of command line arguments
+ * @param  argv  command line arguments themselves
+ *
+ * @return  exit code
+ */
 int main(int argc, char **argv)
 {
   char *filters[MAXFILTERS];

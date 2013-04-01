@@ -1,3 +1,9 @@
+/**
+ * @file
+ * Workers that capture network streams and pass to their parent summarized
+ * data about the streams (unit API).
+ */
+
 #ifndef __PCAP_COLLECT_H
 #define __PCAP_COLLECT_H
 

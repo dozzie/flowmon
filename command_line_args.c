@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Command line and config file parsing.
+ */
+
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
@@ -11,14 +16,27 @@
 
 //----------------------------------------------------------------------------
 
+/// Recognized whitespace characters.
 #define WHITESPACES " \t\n"
 
 //----------------------------------------------------------------------------
 
-// function splits lines to interface name, filter and description
-// function returns 0 on failure and 1 on success
-// *iface, *filter and *descr are allocated with malloc(), so caller needs to
-// free them on his own
+/**
+ * Split line to interface name, filter and description.
+ *
+ * @param  line  line to split
+ * @param[out]  iface  address of \c char pointer to store extracted interface
+ *   name
+ * @param[out]  filter  address of \c char pointer to store extracted BPF
+ *   filter
+ * @param[out]  descr  address of \c char pointer to store extracted
+ *   description
+ *
+ * @return  1 on success, 1 on failure
+ *
+ * @note  \c *iface, \c *filter and \c *descr are allocated with \c malloc(),
+ *   so caller needs to free them on his own.
+ */
 static
 int split_line(char *line, char **iface, char **filter, char **descr)
 {
@@ -83,6 +101,22 @@ int split_line(char *line, char **iface, char **filter, char **descr)
 
 //----------------------------------------------------------------------------
 
+/**
+ * Read stream specifications from command line arguments and files specified
+ * in command line.
+ *
+ * @param  argc
+ * @param  argv
+ * @param[out]  bpfilters
+ * @param[out]  descrs
+ * @param[out]  ifaces
+ *
+ * @return  number of streams
+ *
+ * @note  Function reads no more than \ref MAXFILTERS specifications.
+ *
+ * @todo  Rename this function.
+ */
 size_t count_flow_number(int argc, char **argv,
                          char **bpfilters, char **descrs, char **ifaces)
 {

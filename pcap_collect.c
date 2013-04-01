@@ -1,3 +1,9 @@
+/**
+ * @file
+ * Workers that capture network streams and pass to their parent summarized
+ * data about the streams.
+ */
+
 #include <pcap.h>
 #include <string.h>   // memset()
 #include <time.h>     // nanosleep()
@@ -7,23 +13,41 @@
 #include "internal_ipc.h" // send_stream_data()
 #include "pcap_collect.h"
 
+/// How long should \c pcap_loop() run.
 #define FOREVER (-1)
 
 //----------------------------------------------------------------------------
 
+/**
+ * Container for data about the stream.
+ */
 struct stream_data {
+  /// Stream ID (chosen by parent).
   int id;
+  /// Where to send data (with \ref send_stream_data()) periodically.
   int write_fd;
+  /// <i>unused</i>
   int time;
+  /// Bytes collected so far.
   int bytes;
+  /// Packets collected so far.
   int packets;
+  /// Mutex for modifying data in this container.
   pthread_mutex_t *mutex;
 };
 
+/// Type of thread's main function.
 typedef void* (*pthread_main)(void *);
 
 //----------------------------------------------------------------------------
 
+/**
+ * Callback function for libpcap, aggregating information about the stream.
+ *
+ * @param  stream  data about the stream
+ * @param  hdr  information about the packet
+ * @param  bytes  packet itself
+ */
 static
 void count_packets(struct stream_data *stream,
                    const struct pcap_pkthdr *hdr,
@@ -39,6 +63,15 @@ void count_packets(struct stream_data *stream,
 
 //----------------------------------------------------------------------------
 
+/**
+ * Sender thread main loop.
+ * This function every second sends data collected by \ref count_packets() to
+ * parent process.
+ *
+ * @param  stream  data about the stream
+ *
+ * @return  \c NULL
+ */
 static
 void* periodic_send_stream_data(struct stream_data *stream)
 {
@@ -63,6 +96,15 @@ void* periodic_send_stream_data(struct stream_data *stream)
 
 //----------------------------------------------------------------------------
 
+/**
+ * Spawn a thread that will periodically send data to parent and setup
+ * libpcap capture.
+ *
+ * @param  id  steram identifier
+ * @param  write_fd  where to send data to parent process
+ * @param  iface  interface on which libpcap should capture the stream
+ * @param  filter  BPF filter specification to use with capture
+ */
 void start_pcap_process(int id, int write_fd, char *iface, char *filter)
 {
   struct bpf_program compiled_filter;
