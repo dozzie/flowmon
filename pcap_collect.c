@@ -8,6 +8,8 @@
 #include <string.h>   // memset()
 #include <time.h>     // nanosleep()
 #include <pthread.h>
+#include <errno.h>
+#include <stdlib.h>   // exit()
 
 #include "err_msg.h"      // errprintf()
 #include "internal_ipc.h" // send_stream_data()
@@ -81,12 +83,24 @@ void* periodic_send_stream_data(struct stream_data *stream)
 
     pthread_mutex_lock(stream->mutex);
 
-    send_stream_data(stream->write_fd, stream->id,
-                     time(NULL), stream->bytes, stream->packets);
+    int result = send_stream_data(stream->write_fd, stream->id,
+                                  time(NULL), stream->bytes, stream->packets);
 
-    // reset stats
-    stream->bytes   = 0;
-    stream->packets = 0;
+    if (result > -1) {
+      // reset stats
+      stream->bytes   = 0;
+      stream->packets = 0;
+    } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      // do nothing, not even reset the counters
+    } else if (errno == ENOTCONN || errno == ECONNREFUSED) {
+      // remote endpoint finished
+      exit(0);
+    } else {
+      // error
+      errprintf("stream=%d [errno=%d] %s\n",
+                stream->id, errno, strerror(errno));
+      exit(1);
+    }
 
     pthread_mutex_unlock(stream->mutex);
   }

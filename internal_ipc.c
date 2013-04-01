@@ -34,13 +34,19 @@ struct stream_data_buffer {
  * @param  bytes  number of bytes collected
  * @param  packets  number of packets collected
  *
+ * @return  the same as \c send(), including \c errno
+ *
+ * @note  sending is done in non-blocking manner (check result for -1 and
+ *   \c errno for \c EAGAIN or \c EWOULDBLOCK)
+ *
  * @see  \ref read_stream_data()
  * @see  \ref make_pipe()
  */
-void send_stream_data(int fd, int id, int time, int bytes, int packets)
+int send_stream_data(int fd, int id, int time, int bytes, int packets)
 {
   struct stream_data_buffer buffer = { id, time, bytes, packets };
-  send(fd, &buffer, sizeof(buffer), MSG_DONTWAIT);
+
+  return send(fd, &buffer, sizeof(buffer), MSG_DONTWAIT);
 }
 
 /**
