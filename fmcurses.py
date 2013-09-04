@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import os
 #import optparse
 #import Queue
 import time
@@ -9,10 +10,9 @@ import time
 # non-blocking I/O {{{
 
 def set_nonblocking(filehandle):
-  from os import O_NONBLOCK
   from fcntl import fcntl, F_SETFL, F_GETFL
   fd = filehandle.fileno()
-  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK)
+  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | os.O_NONBLOCK)
 
 def try_read_json(filehandle):
   import errno
@@ -119,6 +119,12 @@ class Curses:
     #self.screen.nodelay(1)
     self.screen.timeout(100)
 
+    self.tty = open('/dev/tty', 'r')
+    set_nonblocking(self.tty)
+    # if there wasn't (n)curses in use, I would set terminal into raw noecho
+    # mode (equivalent to following code, but without calling os.system())
+    #os.system('stty raw -echo <&%d' % self.tty.fileno())
+
   def __del__(self):
     import curses
     curses.endwin()
@@ -128,6 +134,15 @@ class Curses:
 
   def refresh(self):
     self.screen.refresh()
+    char = None
+    try:
+      if self.tty.read(1) == 'q':
+        raise KeyboardInterrupt()
+    except IOError, e:
+      if e.errno == os.errno.EAGAIN:
+        pass # ignore
+      else:
+        raise e
 
 # }}}
 #-----------------------------------------------------------------------------
