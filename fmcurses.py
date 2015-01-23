@@ -166,7 +166,8 @@ def print_stream(stream):
   screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, name), curses.A_BOLD)
   # print stream flow
   for p in range(len(periods)):
-    flow = mean[i].mean(periods[p])
+    # display units are kB/s, but collected are B/s
+    flow = mean[i].mean(periods[p]) / 1024.0
     screen.prn(i * 2 + 2, 22 * p, "%9.2f kB/s [%3ds]" % (flow, periods[p]))
 
 try:
