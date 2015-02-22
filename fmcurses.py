@@ -134,6 +134,7 @@ class Curses:
 
   def refresh(self):
     self.screen.refresh()
+    self.screen.move(0, 0)
     char = None
     try:
       if self.tty.read(1) == 'q':
