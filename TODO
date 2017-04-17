@@ -7,15 +7,12 @@ flowmon:
   * graceful quit on closing STDOUT
 
 fmcurses.py:
-  * add comment on what the heck is this
-  * support for different window lengths for mean
-  * support for 'q' key for quit
-  * support for different ID, name and value attributes
+  * display options: kB/s, B/s, b/s, kb/s, pkt/s, kpkt/s
+  * option to execute flowmon by fmcurses.py instead of read from STDIN (and
+    flowmon's options -f, -d, -i)
 
 fmrrd.py:
-  * add comment on what the heck is this
   * support more than one stream
-  * support different data record layout (now: "time","bytes","packets")
   * probably the best would be to make it a module
     * module can spawn flowmon on its own
 

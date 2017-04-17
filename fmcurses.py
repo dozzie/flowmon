@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#
+# This script summarizes data collected by flowmon(8) and displays it on
+# screen as averages over several time windows of different lengths (e.g.
+# average over 5s, 30s, and 180s).
+#
 
 import sys
 import os

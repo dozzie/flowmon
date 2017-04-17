@@ -1,4 +1,28 @@
 #!/usr/bin/python
+#
+# This script is an example of how to put stream data from flowmon to RRD
+# database.
+#
+# You can use following command to create an RRD database suitable for this
+# script:
+#
+# rrdtool create database.rrd \
+#   --step 1 \
+#   DS:bytes:ABSOLUTE:2:0:U \
+#   DS:packets:ABSOLUTE:2:0:U \
+#   RRA:AVERAGE:0.25:1:301 \
+#   RRA:AVERAGE:0.25:60:361 \
+#   RRA:AVERAGE:0.25:3600:721
+#
+# Record count notes:
+#   301 = 1 +  5 * 60 # 5 minutes worth data of granularity 1s
+#   361 = 1 +  6 * 60 # 6 hours worth data of granularity 60s = 1min
+#   721 = 1 + 30 * 24 # 30 days worth data of granularity 3600s = 1h
+#
+# For each RRA an additional record is for the record currently being filled.
+#
+# See rrdcreate(1) man page for details.
+#
 
 import sys
 import rrdtool
