@@ -1,0 +1,100 @@
+=pod
+
+=head1 NAME
+
+I<flowmon> - network data flow monitor
+
+=head1 SYNOPSIS
+
+B<flowmon> [ B<-f> I<filter> [ B<-i> I<iface> ] [ B<-d> I<description> ] ] ...
+
+B<flowmon> I<filter_file> [ I<options> ]
+
+=head1 DESCRIPTION
+
+I<flowmon> is a tool to monitor and report amount of network traffic, with
+data streams defined in a similar fashion to L<tcpdump(8)>.
+
+I<flowmon> is intended to be data source for some other program, like ncurses
+display, L<rrdtool(1)> writer, or an agent of monitoring system.
+
+=head1 OPTIONS
+
+I<flowmon> expects in command line arguments a list of streams to monitor.
+A stream has a packet filter, may be attached to specific network interface,
+and may have a description. Order of options is not important, except the rule
+that first B<-f> option is combined with first B<-i> and first B<-d>, second
+B<-f> option is combined with second B<-i> and B<-d>, and so on.
+
+Supported options are:
+
+=over
+
+=item B<-f> I<filter>
+
+filter definition in L<bpf(4)> syntax
+
+=item B<-i> I<iface>
+
+interface on which B<-f> filter will operate; defaults to C<any>
+
+=item B<-d> I<description>
+
+stream description; defaults to B<-f> filter itself
+
+=back
+
+=head1 FILTER FILE
+
+I<flowmon> supports reading stream definitions from a file. Each stream
+definition is a separate line and has three fields: interface name, L<bpf(4)>
+filter, and description. Empty lines and lines starting with C<#> character
+are ignored.
+
+Interface name is just a sequence of non-space characters, and filter and
+description are surrounded with single quote (C<'>) characters.
+
+Example filter file:
+
+  any 'tcp port 22' 'SSH'
+  any 'esp'         'IPsec'
+  any 'port 53'     'DNS'
+
+=head1 OUTPUT FORMAT
+
+I<flowmon> reports stream statistics to its I<STDOUT>. Statistics are printed
+in JSON format, one hash per line. Each defined stream produces one JSON each
+second.
+
+Example output (line folded for readability):
+
+  {"stream_id": 0, "stream_name": "SSH", "time": 1234567890,
+    "bytes": 288, "packets": 3}
+
+Fields are as follow:
+
+=over
+
+=item C<"stream_id">
+
+position of a stream in the list of all defined streams, starting with C<0>
+
+=item C<"stream_name">
+
+description of a stream (B<-d>)
+
+=item C<"time">
+
+unix timestamp (L<time(2)>) of when data was collected
+
+=item C<"bytes">, C<"packets">
+
+size of data stream that passed through filter since last report
+
+=back
+
+=head1 SEE ALSO
+
+L<bpf(4)>, L<pcap-filter(7)>, L<tcpdump(8)>
+
+=cut

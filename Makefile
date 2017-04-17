@@ -8,18 +8,30 @@ LD = gcc
 
 #-----------------------------------------------------------------------------
 
-.PHONY: all doc
-
+.PHONY: all
 all: flowmon
-
-doc:
-	doxygen doxygen.conf
 
 flowmon: main.o pcap_collect.o internal_ipc.o command_line_args.o err_msg.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(filter %.c,$^)
+
+#-----------------------------------------------------------------------------
+# documentation
+
+.PHONY: doxygen
+doxygen:
+	doxygen doxygen.conf
+
+.PHONY: man
+man: man/flowmon.8
+
+man/%.8: man/%.pod
+	pod2man --section=8 --center="Linux System Administration" --release="" $< $@
+
+man/%.1: man/%.pod
+	pod2man --section=1 --center="User Commands" --release="" $< $@
 
 #-----------------------------------------------------------------------------
 # *.o dependencies
