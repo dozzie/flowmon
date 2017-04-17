@@ -2,13 +2,35 @@
 
 import sys
 import os
-#import optparse
+import optparse
 import time
 import fcntl
 import errno
 import json
 import curses
 
+#-----------------------------------------------------------------------------
+# command line options {{{
+
+parser = optparse.OptionParser(
+    usage = "%prog [options]"
+)
+
+parser.add_option(
+    "-t", "--interval", dest = "intervals", action = "append", default = None,
+    type = "int",
+    help = "display average over interval (option may be used multiple times)",
+    metavar = "SECONDS",
+)
+
+(options, args) = parser.parse_args()
+
+if options.intervals is None:
+    options.intervals = [5, 30, 180]
+
+options.max_interval = max(options.intervals)
+
+# }}}
 #-----------------------------------------------------------------------------
 # non-blocking I/O {{{
 
@@ -148,24 +170,23 @@ set_nonblocking(sys.stdin)
 
 screen = Curses()
 mean = {}
-periods = [5, 30, 180]
-max_period = max(periods)
 
 def print_stream(stream):
     i = stream["stream_id"]
     name = stream["stream_name"]
     if i not in mean:
-        mean[i] = WindowedMean(window = max_period)
+        mean[i] = WindowedMean(window = options.max_interval)
 
     mean[i].update(stream["bytes"], stream["time"])
 
     # print stream name
     screen.prn(i * 2 + 1, 0, "[%d] %s" % (i, name), curses.A_BOLD)
     # print stream flow
-    for p in range(len(periods)):
+    for p in range(len(options.intervals)):
         # display units are kB/s, but collected are B/s
-        flow = mean[i].mean(periods[p]) / 1024.0
-        screen.prn(i * 2 + 2, 22 * p, "%9.2f kB/s [%3ds]" % (flow, periods[p]))
+        flow = mean[i].mean(options.intervals[p]) / 1024.0
+        screen.prn(i * 2 + 2, 22 * p,
+                   "%9.2f kB/s [%3ds]" % (flow, options.intervals[p]))
 
 try:
     while True:
