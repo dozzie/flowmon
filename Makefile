@@ -11,6 +11,11 @@ LD = gcc
 .PHONY: all
 all: flowmon
 
+.PHONY: clean
+clean:
+	rm -f flowmon *.o
+	rm -rf doc/api
+
 flowmon: main.o pcap_collect.o internal_ipc.o command_line_args.o err_msg.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
