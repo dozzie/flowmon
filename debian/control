@@ -1,0 +1,15 @@
+Source: flowmon
+Maintainer: Stanislaw Klekot <dozzie@jarowit.net>
+Section: net
+Priority: optional
+Build-Depends: debhelper (>> 7.0.0), make, libpcap-dev
+
+Package: flowmon
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: network data flow monitor
+ flowmon is a tool to monitor and report amount of network traffic, with data
+ streams defined in a similar fashion to tcpdump.
+ .
+ flowmon is intended to be data source for some other program, like ncurses
+ display, rrdtool writer, or an agent of monitoring system.

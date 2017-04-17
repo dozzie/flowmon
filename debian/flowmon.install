@@ -1,0 +1,3 @@
+/usr/sbin/flowmon
+/usr/share/flowmon/examples/fmcurses.py
+/usr/share/flowmon/examples/fmrrd.py

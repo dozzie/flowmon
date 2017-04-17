@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_pysupport:
+
+override_dh_auto_install:
+	install -D -m 755 flowmon $(CURDIR)/debian/tmp/usr/sbin/flowmon
+	install -D -m 755 fmcurses.py $(CURDIR)/debian/tmp/usr/share/flowmon/examples/fmcurses.py
+	install -D -m 755 fmrrd.py $(CURDIR)/debian/tmp/usr/share/flowmon/examples/fmrrd.py
